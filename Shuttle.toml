@@ -1,0 +1,6 @@
+# Declare files that should be included in deployment
+assets = [
+    "configs/Default.toml"
+]
+# App name
+name = "backendery-lets-start"
