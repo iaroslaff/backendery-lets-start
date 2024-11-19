@@ -1,0 +1,25 @@
+---
+name: Deploy Rust app to Shuttle
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: shuttle-rs
+    steps:
+      - uses: shuttle-hq/deploy-action@main
+        with:
+          cargo-shuttle-version: '0.48.2'
+          deploy-key: ${{ secrets.SHUTTLE_API_KEY }}
+          secrets: |
+            DATADOG_API_KEY = '${{ secrets.DATADOG_API_KEY }}'
+            DATADOG_LOG_LEVEL = '${{ secrets.DATADOG_LOG_LEVEL }}'
+            DATADOG_TAGS = '${{ secrets.DATADOG_TAGS }}'
+
+            SMTP_ADDR = '${{ secrets.SMTP_ADDR }}'
+            SMTP_AUTH = '${{ secrets.SMTP_AUTH }}'
