@@ -51,9 +51,6 @@ pub struct AppConfigs {
         )
     )]
     pub smtp_connection_timeout: u64,
-
-    #[validate(custom(function = "validate_log_level"))]
-    pub(super) tracing_log_level: String,
 }
 
 fn validate_allow_origins_urls(origins: &[String]) -> Result<(), ValidationError> {
@@ -88,17 +85,4 @@ fn validate_smtp_auth_uri(auth: &str) -> Result<(), ValidationError> {
     }
 
     Ok(())
-}
-
-fn validate_log_level(level: &str) -> Result<(), ValidationError> {
-    match level {
-        "error" | "warn" | "info" | "debug" | "trace" => Ok(()),
-        _ => {
-            let mut err = ValidationError::new("invalid_log_level");
-            err.message =
-                Some("must be a valid log level (e.g., error, warn, info, debug, trace)".into());
-
-            return Err(err);
-        }
-    }
 }
