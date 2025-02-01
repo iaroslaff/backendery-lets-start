@@ -3,7 +3,7 @@ mod configs;
 
 use std::{borrow::Cow, sync::Arc};
 
-use anyhow::Context;
+use anyhow::{Context, Error};
 use axum::{
     http::{header, HeaderValue, Method},
     routing::{get, post},
@@ -74,8 +74,16 @@ async fn axum(#[ShuttleSecrets] secrets: ShuttleSecretStore) -> ShuttleAxum {
         .add_source(File::with_name("configs/default").required(true))
         .add_source(secrets_source)
         .build()
+        .map_err(|err| {
+            tracing::error!("failed to build config: {:?}", Error::msg(err.to_string())); 
+            err
+        })
         .context("couldn't get the application config")?
         .try_deserialize::<AppConfigs>()
+        .map_err(|err| {
+            tracing::error!("failed to deserialize config: {:?}", Error::msg(err.to_string()));
+            err
+        })
         .context("failed to deserialise the application config")?;
 
     configs.validate().context("failed to validate the application config")?;
