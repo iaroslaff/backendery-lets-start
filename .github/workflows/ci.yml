@@ -3,8 +3,8 @@ name: Deploy Rust app to Shuttle
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - 'main'
   workflow_dispatch:
 
 jobs:
