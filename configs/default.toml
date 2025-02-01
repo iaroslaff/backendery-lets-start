@@ -11,6 +11,3 @@ retry_timeout = 50
 
 # Smpt
 smtp_connection_timeout = 5000
-
-# Tracing
-tracing_log_level = "info"

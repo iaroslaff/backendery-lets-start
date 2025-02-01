@@ -50,46 +50,49 @@ fn sentry_init(configs: &AppConfigs) -> ClientInitGuard {
     ))
 }
 
-fn tracing_init(configs: &AppConfigs) {
-    let level_filter =
-        configs.tracing_log_level.parse::<LevelFilter>().unwrap_or(LevelFilter::INFO);
+fn tracing_init() {
+    let level_filter = if cfg!(debug_assertions) {
+        LevelFilter::DEBUG
+    } else {
+        LevelFilter::ERROR
+    };
 
     let filter_layer =
         EnvFilter::builder().with_default_directive(level_filter.into()).from_env_lossy();
+
     let fmt_layer = tracing_subscriber::fmt::layer()
-        .json()
-        .flatten_event(true)
-        .with_ansi(false)
+        .compact()
+        .with_ansi(true)
         .with_target(false)
-        .with_timer(tracing_subscriber::fmt::time::SystemTime)
-        .with_span_list(true);
+        .without_time();
 
     tracing_subscriber::registry().with(filter_layer).with(fmt_layer).init();
 }
 
 #[shuttle_main]
 async fn axum(#[ShuttleSecrets] secrets: ShuttleSecretStore) -> ShuttleAxum {
+    tracing_init();
+
     let secrets_source = Config::try_from(&secrets).context("couldn't get the secrets")?;
     let configs = Config::builder()
         .add_source(File::with_name("configs/default").required(true))
         .add_source(secrets_source)
         .build()
         .map_err(|err| {
-            tracing::error!("failed to build config: {:?}", Error::msg(err.to_string())); 
+            tracing::error!("failed to build the config: {:?}", Error::msg(err.to_string()));
             err
         })
-        .context("couldn't get the application config")?
+        .context("couldn't build the application config")?
         .try_deserialize::<AppConfigs>()
         .map_err(|err| {
-            tracing::error!("failed to deserialize config: {:?}", Error::msg(err.to_string()));
+            tracing::error!("failed to deserialize the config: {:?}", Error::msg(err.to_string()));
             err
         })
-        .context("failed to deserialise the application config")?;
+        .context("couldn't deserialize the application config")?;
 
     configs.validate().context("failed to validate the application config")?;
 
     let _guard = sentry_init(&configs);
-    tracing_init(&configs);
 
     let app = Router::new()
         .route("/api/v1/alive", get(alive_handler))
