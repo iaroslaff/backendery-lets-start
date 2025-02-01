@@ -6,7 +6,7 @@
 
 <div align="center">
 
-![GitHub Tag](https://img.shields.io/github/v/tag/iaroslaff/backendery-lets-start?style=flat&logoColor=ffffff&labelColor=141519&color=67df8f)
+![GitHub Deploy](https://img.shields.io/github/deployments/iaroslaff/backendery-lets-start/shuttle?style=flat&logoColor=f1f7f7&labelColor=030f0f&color=00df82)
 
 </div>
 <!-- markdownlint-restore -->
